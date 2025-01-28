@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import FileSaver from "file-saver";
 
 // Base URL for API
 const API_BASE_URL = 'http://localhost:5000/api/entities';
@@ -39,15 +40,20 @@ export const deleteEntity = createAsyncThunk('entities/deleteEntity', async (id)
 });
 
 // Export entities to Excel
-export const exportToExcel = createAsyncThunk('entities/exportToExcel', async () => {
-  const response = await axios.get(`${API_BASE_URL}/export`, { responseType: 'blob' });
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', 'entities.xlsx');
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+export const exportToExcel = createAsyncThunk("entities/exportToExcel", async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}`, {
+      responseType: "blob", // Important for file download
+    });
+
+    const blob = new Blob([response.data], { type: response.headers["content-type"] });
+    FileSaver.saveAs(blob, "entities.xlsx");
+
+    return "Export successful";
+  } catch (error) {
+    console.error("❌ Export failed:", error);
+    return rejectWithValue(error.response?.data?.message || "Export failed");
+  }
 });
 
 // Bulk Activate Entities

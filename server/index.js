@@ -179,37 +179,34 @@ app.delete('/api/entities/:id', async (req, res) => {
 });
 
 // Export entities to Excel
-app.get('/api/entities/export', async (req, res) => {
+app.get("/export", async (req, res) => {
   const { showDeleted = false } = req.query;
-  const filter = { isDeleted: showDeleted === 'true' };
+  const filter = { isDeleted: showDeleted === "true" };
 
   try {
-    const entities = await Entity.find(filter).select('-_id -isDeleted'); // Exclude _id and isDeleted
-
-    // Convert data to JSON and then to Excel format
+    const entities = await Entity.find(filter).select("-_id -isDeleted"); // Exclude _id and isDeleted
     const jsonData = entities.map((entity) => entity.toObject());
+
+    // Create workbook and worksheet
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(jsonData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Entities');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Entities");
 
-    // Write the workbook to a file
-    const filePath = path.join(__dirname, 'entities.xlsx');
-    XLSX.writeFile(workbook, filePath);
+    // Convert workbook to a buffer and send as response
+    const excelBuffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
 
-    // Send the file as a download
-    res.download(filePath, 'entities.xlsx', (err) => {
-      if (err) {
-        console.error('Error sending file:', err);
-      }
+    // Set headers for download
+    res.setHeader("Content-Disposition", "attachment; filename=entities.xlsx");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-      // Remove the file after download
-      fs.unlinkSync(filePath);
-    });
+    return res.send(excelBuffer);
   } catch (error) {
-    await Exlog.create({ error: error.message });
-    res.status(500).json({ message: 'Error exporting data to Excel' });
+    console.error("❌ Error exporting Excel:", error);
+    res.status(500).json({ message: "Error exporting data to Excel" });
   }
 });
+
+module.exports = app;
 
 // Error Logging
 app.get('/api/exlogs', async (req, res) => {
