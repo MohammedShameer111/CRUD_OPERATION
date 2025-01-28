@@ -51,7 +51,7 @@ export const exportToExcel = createAsyncThunk("entities/exportToExcel", async (_
 
     return "Export successful";
   } catch (error) {
-    console.error("❌ Export failed:", error);
+    console.error(" Export failed:", error);
     return rejectWithValue(error.response?.data?.message || "Export failed");
   }
 });

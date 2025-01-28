@@ -54,8 +54,8 @@ const handleExportToExcel = async () => {
     await dispatch(exportToExcel()).unwrap();
     alert("✅ Export successful");
   } catch (error) {
-    console.error("❌ Export failed:", error.message);
-    alert("❌ Export failed");
+    console.error(" Export failed:", error.message);
+    alert(" Export failed");
   }
 };
 

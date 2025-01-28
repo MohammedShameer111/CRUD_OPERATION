@@ -115,7 +115,7 @@ app.put('/api/entities/bulk/activate', async (req, res) => {
 
     res.json({ message: 'Entities activated successfully' });
   } catch (error) {
-    console.error('❌ Server Error:', error);
+    console.error(' Server Error:', error);
     await Exlog.create({ error: error.message });
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -138,7 +138,7 @@ app.put('/api/entities/bulk/deactivate', async (req, res) => {
 
     res.json({ message: 'Entities deactivated successfully' });
   } catch (error) {
-    console.error('❌ Server Error:', error);
+    console.error(' Server Error:', error);
     await Exlog.create({ error: error.message });
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -161,7 +161,7 @@ app.put('/api/entities/bulk/delete', async (req, res) => {
 
     res.json({ message: 'Entities deleted successfully' });
   } catch (error) {
-    console.error('❌ Server Error:', error);
+    console.error(' Server Error:', error);
     await Exlog.create({ error: error.message });
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -201,7 +201,7 @@ app.get("/export", async (req, res) => {
 
     return res.send(excelBuffer);
   } catch (error) {
-    console.error("❌ Error exporting Excel:", error);
+    console.error(" Error exporting Excel:", error);
     res.status(500).json({ message: "Error exporting data to Excel" });
   }
 });
