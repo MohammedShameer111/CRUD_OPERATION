@@ -86,7 +86,7 @@ const handleExportToExcel = async () => {
   return (
     <div className="list-view">
       <aside className="sidebar">
-        <h2>Deleted Entity</h2>
+        <h2>Deleted Entities</h2>
         <button onClick={() => setShowDeleted(!showDeleted)}>
           {showDeleted ? "Hide Deleted" : "Show Deleted"}
         </button>
