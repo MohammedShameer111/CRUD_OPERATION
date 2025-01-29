@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './DeleteEntities.css';
+import { toast } from 'sonner';
+import Swal from 'sweetalert2';
 
 const DeletedEntities = () => {
   const [deletedEntities, setDeletedEntities] = useState([]);
@@ -22,21 +24,46 @@ const DeletedEntities = () => {
     try {
       await axios.put(`http://localhost:5000/api/entities/${id}/restore`);
       fetchDeletedEntities();
+      Swal.fire({
+        icon: 'success',
+        title: 'Entity restored successfully!',
+      });
     } catch (error) {
-      console.error('Error restoring entity:', error);
+      console.error("Error restoring entity:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to restore entity!',
+      });
     }
   };
 
   const deletePermanently = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this entity permanently?");
-    if (!confirmDelete) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/api/entities/${id}/permanent`);
-      fetchDeletedEntities();
-    } catch (error) {
-      console.error('Error deleting entity permanently:', error);
-    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This action cannot be undone!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        try {
+          axios.delete(`http://localhost:5000/api/entities/${id}/permanent`)
+            .then(() => {
+              fetchDeletedEntities();
+              Swal.fire('Deleted!', 'The entity has been permanently deleted.', 'success');
+            });
+        } catch (error) {
+          console.error("Error deleting entity permanently:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed to delete entity permanently!',
+          });
+        }
+      }
+    });
   };
 
   return (

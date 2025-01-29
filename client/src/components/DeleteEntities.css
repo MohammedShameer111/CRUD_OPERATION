@@ -25,8 +25,6 @@ h2 {
 }
 
 .table-container {
-  max-width: 1000px;
-  margin: auto;
   background: var(--bg-white);
   padding: 20px;
   border-radius: 10px;
@@ -68,11 +66,13 @@ button {
   font-weight: 600;
   transition: 0.3s;
   margin: 5px;
+  width: auto; /* Ensure width adjusts to content */
 }
 
 .restore-btn {
   background: var(--primary-color);
   color: white;
+  
 }
 
 .restore-btn:hover {

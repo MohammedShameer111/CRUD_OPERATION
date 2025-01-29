@@ -21,6 +21,10 @@ button {
   background: var(--primary);
   color: white;
   cursor: pointer;
+  background: green;
+}
+.reset-btn{
+  background: #0056b3;
 }
 
 button:hover {

@@ -1,0 +1,30 @@
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app-container {
+  display: flex;
+  
+}
+
+.main-content {
+  flex-grow: 1;
+  margin-left: 250px; /* Offset for the sidebar */
+  padding: 20px;
+  background: #ecf0f1;
+  min-height: 100vh;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

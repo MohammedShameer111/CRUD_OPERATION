@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { updateEntity, addEntity } from '../features/entitiesSlice';
 import axios from 'axios';
 import './EditView.css';
+import { toast } from 'sonner';
+import Swal from 'sweetalert2';
 
 const EditView = () => {
   const [formData, setFormData] = useState({
@@ -43,30 +45,58 @@ const EditView = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle save operation
+  // Handle save operation with SweetAlert2 confirmation
   const handleSave = (e) => {
     e.preventDefault();
-    if (id) {
-      // Update an existing entity
-      dispatch(updateEntity({ id, entity: formData }));
-    } else {
-      // Add a new entity
-      dispatch(addEntity(formData));
-    }
-    navigate('/');
+    
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to save the changes?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Save it!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (id) {
+          dispatch(updateEntity({ id, entity: formData }));
+          toast.success("Entity updated successfully!");
+        } else {
+          dispatch(addEntity(formData));
+          toast.success("New entity added successfully!");
+        }
+        navigate('/');
+      }
+    });
   };
 
-  // Reset the form to initial data
+  // Reset the form with SweetAlert2 confirmation
   const handleReset = () => {
-    setFormData(initialData || {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phoneNumber: '',
-      purpose: '',
-      timeIn: '',
-      timeOut: '',
-      status: 'Active',
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to reset the form?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, reset it!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setFormData(initialData || {
+          firstName: '',
+          lastName: '',
+          email: '',
+          phoneNumber: '',
+          purpose: '',
+          timeIn: '',
+          timeOut: '',
+          status: 'Active',
+        });
+        Swal.fire('Reset!', 'The form has been reset.', 'success');
+      }
     });
   };
 
