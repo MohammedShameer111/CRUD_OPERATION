@@ -1,42 +1,41 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios from 'axios'; // to make http request
 import FileSaver from "file-saver";
 
 // Base URL for API
-const API_BASE_URL = 'http://localhost:5000/api/entities';
+const API_BASE_URL = 'http://localhost:5000/api/entities'; // backend endpoint
 
-// Async Thunks
 
-// Fetch entities with pagination, search, and showDeleted filters
-export const fetchEntities = createAsyncThunk(
-  'entities/fetchEntities',
-  async ({ page = 1, search = '', showDeleted = false }) => {
-    const response = await axios.get(API_BASE_URL, {
-      params: { page, search, showDeleted },
-    });
+
+
+export const addEntity = createAsyncThunk('entities/addEntity', async (entity, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(API_BASE_URL, entity);
     return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data || 'An error occurred while adding the entity.');
   }
-);
-
-// Add a new entity
-export const addEntity = createAsyncThunk('entities/addEntity', async (entity) => {
-  const response = await axios.post(API_BASE_URL, entity);
-  return response.data;
 });
 
-// Update an entity
 export const updateEntity = createAsyncThunk(
   'entities/updateEntity',
-  async ({ id, entity }) => {
-    const response = await axios.put(`${API_BASE_URL}/${id}`, entity);
-    return response.data;
+  async ({ id, entity }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/${id}`, entity);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'An error occurred while updating the entity.');
+    }
   }
 );
 
-// Soft delete a single entity
-export const deleteEntity = createAsyncThunk('entities/deleteEntity', async (id) => {
-  const response = await axios.delete(`${API_BASE_URL}/${id}`);
-  return { id }; // Return the deleted entity's ID for state update
+export const deleteEntity = createAsyncThunk('entities/deleteEntity', async (id, { rejectWithValue }) => {
+  try {
+    await axios.delete(`${API_BASE_URL}/${id}`);
+    return { id }; 
+  } catch (error) {
+    return rejectWithValue(error.response?.data || 'An error occurred while deleting the entity.');
+  }
 });
 
 // Export entities to Excel
@@ -55,7 +54,18 @@ export const exportToExcel = createAsyncThunk("entities/exportToExcel", async (_
     return rejectWithValue(error.response?.data?.message || "Export failed");
   }
 });
+// Async Thunks
 
+// Fetch entities with pagination, search, and showDeleted filters
+export const fetchEntities = createAsyncThunk(
+  'entities/fetchEntities',
+  async ({ page = 1, search = '', showDeleted = false }) => {
+    const response = await axios.get(API_BASE_URL, {
+      params: { page, search, showDeleted },
+    });
+    return response.data;
+  }
+);
 // Bulk Activate Entities
 export const bulkActivateEntities = createAsyncThunk(
   'entities/bulkActivateEntities',
@@ -86,7 +96,7 @@ export const bulkDeleteEntities = createAsyncThunk(
 // Slice
 const entitiesSlice = createSlice({
   name: 'entities',
-  initialState: {
+  initialState: {//combines reducers,actions and initial state in one place
     entities: [], // List of entities
     total: 0, // Total count for pagination
     status: 'idle', // Status for fetching entities

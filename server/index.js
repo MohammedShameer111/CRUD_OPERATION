@@ -1,5 +1,5 @@
-const express = require('express');
-const mongoose = require('mongoose');
+const express = require('express'); 
+const mongoose = require('mongoose'); 
 const cors = require('cors');
 const XLSX = require('xlsx');
 const fs = require('fs');
@@ -15,7 +15,7 @@ mongoose.connect('mongodb://localhost:27017/CRUD')
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
 // Entity Schema
-const entitySchema = new mongoose.Schema({
+const entitySchema = new mongoose.Schema({ // defines the structure of the document
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true },
@@ -35,32 +35,12 @@ const exlogSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
-const Entity = mongoose.model('Entity', entitySchema);
-const Exlog = mongoose.model('Exlog', exlogSchema);
+const Entity = mongoose.model('Entity', entitySchema); // collection in mongodb
+const Exlog = mongoose.model('Exlog', exlogSchema);// 
 
 // CRUD Routes
 
-// Get all entities with optional search, pagination, and "show deleted" toggle
-app.get('/api/entities', async (req, res) => {
-  const { page = 1, limit = 10, search = '', showDeleted = false } = req.query;
-  const filter = { isDeleted: showDeleted === 'true' };
-  if (search) {
-    filter.$or = [
-      { firstName: new RegExp(search, 'i') },
-      { lastName: new RegExp(search, 'i') },
-      { email: new RegExp(search, 'i') },
-    ];
-  }
-  try {
-    const entities = await Entity.find(filter)
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
-    const total = await Entity.countDocuments(filter);
-    res.json({ entities, total });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching entities' });
-  }
-});
+
 
 // Create a new entity
 app.post('/api/entities', async (req, res) => {
@@ -74,7 +54,7 @@ app.post('/api/entities', async (req, res) => {
   }
 });
 
-// Fetch a single entity by ID
+// Fetch a single entity by ID it will accept different values dynamically
 app.get('/api/entities/:id', async (req, res) => {
   try {
     const entity = await Entity.findById(req.params.id);
@@ -177,7 +157,27 @@ app.delete('/api/entities/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to delete record' });
   }
 });
-
+// Get all entities with optional search, pagination, and "show deleted" toggle
+app.get('/api/entities', async (req, res) => {
+  const { page = 1, limit = 10, search = '', showDeleted = false } = req.query;
+  const filter = { isDeleted: showDeleted === 'true' };
+  if (search) {
+    filter.$or = [
+      { firstName: new RegExp(search, 'i') },
+      { lastName: new RegExp(search, 'i') },
+      { email: new RegExp(search, 'i') },
+    ];
+  }
+  try {
+    const entities = await Entity.find(filter)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+    const total = await Entity.countDocuments(filter);
+    res.json({ entities, total });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching entities' });
+  }
+});
 // Export entities to Excel
 app.get("/export", async (req, res) => {
   const { showDeleted = false } = req.query;
@@ -246,4 +246,4 @@ app.delete('/api/entities/:id/permanent', async (req, res) => {
 
 
 // Server Listening
-app.listen(5000, () => console.log('Server running on port 5000'));
+app.listen(5000, () => console.log('Server running on port 5000')); //to start the server
