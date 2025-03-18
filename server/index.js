@@ -4,7 +4,10 @@ const cors = require('cors');
 const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
+const { parse } = require("json2csv"); // Converts JSON to CSV
+
 const app = express();
+
 
 app.use(express.json());
 app.use(cors());
@@ -178,35 +181,40 @@ app.get('/api/entities', async (req, res) => {
     res.status(500).json({ message: 'Error fetching entities' });
   }
 });
-// Export entities to Excel
 app.get("/export", async (req, res) => {
   const { showDeleted = false } = req.query;
   const filter = { isDeleted: showDeleted === "true" };
 
   try {
-    const entities = await Entity.find(filter).select("-_id -isDeleted"); // Exclude _id and isDeleted
-    const jsonData = entities.map((entity) => entity.toObject());
+    const entities = await Entity.find(filter).lean();
+    if (entities.length === 0) {
+      return res.status(404).json({ message: "No data to export" });
+    }
 
-    // Create workbook and worksheet
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(jsonData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Entities");
+    // Convert JSON data to CSV
+    const csv = parse(entities, { fields: Object.keys(entities[0]) });
 
-    // Convert workbook to a buffer and send as response
-    const excelBuffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    // Define file path
+    const filePath = path.join(__dirname, "entities.csv");
 
-    // Set headers for download
-    res.setHeader("Content-Disposition", "attachment; filename=entities.xlsx");
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    // Write CSV to file
+    fs.writeFileSync(filePath, csv);
 
-    return res.send(excelBuffer);
+    // Send file as a response
+    res.download(filePath, "entities.csv", (err) => {
+      if (err) {
+        console.error("Error sending file:", err);
+        res.status(500).json({ message: "Error exporting data to CSV" });
+      }
+      // Delete file after sending
+      fs.unlinkSync(filePath);
+    });
+
   } catch (error) {
-    console.error(" Error exporting Excel:", error);
-    res.status(500).json({ message: "Error exporting data to Excel" });
+    console.error("Error exporting CSV:", error);
+    res.status(500).json({ message: "Error exporting data to CSV" });
   }
 });
-
-module.exports = app;
 
 // Error Logging
 app.get('/api/exlogs', async (req, res) => {

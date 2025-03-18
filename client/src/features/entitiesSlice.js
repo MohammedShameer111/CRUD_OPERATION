@@ -38,22 +38,37 @@ export const deleteEntity = createAsyncThunk('entities/deleteEntity', async (id,
   }
 });
 
-// Export entities to Excel
-export const exportToExcel = createAsyncThunk("entities/exportToExcel", async (_, { rejectWithValue }) => {
+export const exportToCSV = createAsyncThunk("export/csv", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}`, {
-      responseType: "blob", // Important for file download
+    const response = await fetch("http://localhost:5000/export", {
+      method: "GET",
     });
 
-    const blob = new Blob([response.data], { type: response.headers["content-type"] });
-    FileSaver.saveAs(blob, "entities.xlsx");
+    if (!response.ok) {
+      throw new Error("Failed to export file");
+    }
+
+    // Convert response to Blob
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    // Create an anchor tag to trigger download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "entities.csv"; // Filename
+    document.body.appendChild(a);
+    a.click();
+
+    // Cleanup
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
 
     return "Export successful";
   } catch (error) {
-    console.error(" Export failed:", error);
-    return rejectWithValue(error.response?.data?.message || "Export failed");
+    return rejectWithValue(error.message);
   }
 });
+
 // Async Thunks
 
 // Fetch entities with pagination, search, and showDeleted filters

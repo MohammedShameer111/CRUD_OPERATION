@@ -18,7 +18,8 @@ import {
   bulkDeactivateEntities,
   bulkDeleteEntities,
   deleteEntity,
-  exportToExcel,
+  exportToCSV,
+
 } from "../features/entitiesSlice";
 import "./ListView.css";
 import { toast } from "sonner";
@@ -69,12 +70,12 @@ const ListView = () => {
   };
   
 
-  const handleExportToExcel = async () => {
+  const handleExportToCSV = async () => {
     try {
-      await dispatch(exportToExcel()).unwrap();
+      await dispatch(exportToCSV()).unwrap();
       toast.success("Export successful!");
     } catch (error) {
-      console.error("Export failed:", error.message);
+      console.error("Export failed:", error);
       toast.error("Export failed");
     }
   };
@@ -133,9 +134,9 @@ const ListView = () => {
             <FontAwesomeIcon icon={faPlus} /> Add Entity
           </button>
         </Link>
-        <button onClick={() => handleExportToExcel()} className="export-btn">
-          <FontAwesomeIcon icon={faFileExport} /> Export to Excel
-        </button>
+        <button onClick={() => handleExportToCSV()} className="export-btn">
+  <FontAwesomeIcon icon={faFileExport} /> Export to CSV
+</button>;
       </div>
 
       {/* 🔹 Filter Buttons */}
